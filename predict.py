@@ -1,0 +1,87 @@
+import argparse
+import tensorflow as tf
+import numpy as np
+import os
+from tensorflow.keras.preprocessing.image import load_img
+
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
+
+
+def find_labels(path):
+    for _, direct, _ in os.walk((path)):
+        labels = direct
+        break
+    labels.sort()
+    labels = {i: name for i, name in enumerate(labels)}
+    return labels
+
+
+def predict(path_model, path_data):
+    try:
+        model = tf.keras.models.load_model(path_model)
+    except ValueError:
+        print(f"Error, no model available at {path_model}")
+
+    _, validation_images = (
+        tf.keras.utils.image_dataset_from_directory(
+            path_data,
+            labels="inferred",
+            label_mode="int",
+            class_names=None,
+            color_mode="rgb",
+            batch_size=32,
+            image_size=(64, 64),
+            seed=42,
+            validation_split=0.2,
+            subset="both",
+            interpolation="bilinear",
+            follow_links=False,
+        )
+    )
+
+    model.evaluate(validation_images)
+
+
+def predict_image(path_model, path_img):
+    try:
+        model = tf.keras.models.load_model(path_model)
+    except ValueError:
+        print(f"Error, no model available at {path_model}")
+        exit(1)
+
+    img = load_img(path_img, target_size=(64, 64))
+    img = np.array(img)
+    
+    img = np.expand_dims(img, axis=0)
+
+    labels = find_labels(os.path.dirname(os.path.dirname(path_img)))
+    print("[DEBUG] Label mapping:", labels)
+    predictions = model.predict(img)
+    print("[DEBUG] Prediction probabilities:", predictions[0])
+    predicted_index = np.argmax(predictions)
+    print("[DEBUG] Predicted index:", predicted_index)
+    print("[DEBUG] Predicted label:", labels[predicted_index])
+    [print(f"{pred:5.3e}:", lab) for pred, lab in zip(predictions[0], list(labels.values()))]
+    predicted_label = labels[predicted_index]
+    return predicted_label
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="Permet de charger le modele et de predire les donnees"
+    )
+
+    parser.add_argument(
+        "path_model", default="model", help="Path vers le model a charger."
+    )
+    parser.add_argument(
+        "path_data",
+        default="leaves/images/",
+        help="Path vers les donnees a predire.",
+    )
+
+    args = parser.parse_args()
+    if os.path.isdir(args.path_data):
+        predict(args.path_model, args.path_data)
+    else:
+        predict_image(args.path_model, args.path_data)
