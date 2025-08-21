@@ -1,6 +1,5 @@
-import numpy as np
-import cv2
 from PIL import Image
+import numpy as np
 from plantcv import plantcv as pcv
 
 fillcolor = "#fff"
@@ -9,34 +8,31 @@ BLUE = [0, 0, 255]
 GREEN = [0, 255, 0]
 RED = [255, 0, 0]
 
-def gray_scale(img: Image.Image):
-    np_img = np.asarray(img.convert("RGB"))
-    new_img = pcv.rgb2gray_lab(rgb_img=np_img, channel="a")
-    new_img = pcv.threshold.otsu(new_img, "dark")
-    return new_img
 
 def get_roi_rectangle(img_mask: np.ndarray):
     nonzero_coords = np.column_stack(np.where(img_mask > 0))
-    if nonzero_coords.size == 0:
-        # If no non-zero pixels, return full image dimensions as a fallback
-        return 0, img_mask.shape[0], 0, img_mask.shape[1]
     y_min, x_min = nonzero_coords.min(axis=0)
     y_max, x_max = nonzero_coords.max(axis=0)
     return y_min, y_max, x_min, x_max
 
+
+def gray_scale(img: Image.Image):
+    np_img = np.asarray(img)
+    new_img = pcv.rgb2gray_lab(rgb_img=np_img, channel="a")
+    new_img = pcv.threshold.otsu(new_img, "dark")
+    return new_img
+
+
 def draw_point_on_image(image, coords, color, radius=4):
-    if coords is None or len(coords) == 0:
-        return
     for coord in coords:
-        if not isinstance(coord, (list, tuple, np.ndarray)) or len(coord) < 2:
-            continue
-        x, y = int(coord[0]), int(coord[1])
+        x, y = coord[0]
         for i in range(-radius, radius+1):
             for j in range(-radius, radius+1):
                 if i**2 + j**2 <= radius**2 and \
                     0 <= x+i < image.shape[1] and \
                         0 <= y+j < image.shape[0]:
                     image[y+j, x+i] = color
+
 
 def pseudolandmarks(img: Image.Image):
     np_img = np.asarray(img)
@@ -45,28 +41,29 @@ def pseudolandmarks(img: Image.Image):
 
     new_img = np_img.copy()
 
-    if top is not None and len(top) > 0: draw_point_on_image(new_img, top, RED)
-    if bottom is not None and len(bottom) > 0: draw_point_on_image(new_img, bottom, BLUE)
-    if center is not None and len(center) > 0: draw_point_on_image(new_img, center, GREEN)
+    draw_point_on_image(new_img, top.astype(int), RED)
+    draw_point_on_image(new_img, bottom.astype(int), BLUE)
+    draw_point_on_image(new_img, center.astype(int), GREEN)
     return new_img
+
 
 def gaussian_blur(img: Image.Image):
     np_img = gray_scale(img)
     return pcv.gaussian_blur(np_img, (3, 3))
+
 
 def mask(img: Image.Image):
     np_img = np.asarray(img)
     img_mask = gray_scale(img)
     return pcv.apply_mask(np_img, img_mask, 'white')
 
+
 def roi_objects(img: Image.Image):
     np_img = np.asarray(img)
     img_mask = gray_scale(img)
-    if not np.any(img_mask > 0):
-        return np_img # Return original image if mask is empty
     y_min, y_max, x_min, x_max = get_roi_rectangle(img_mask)
 
-    new_img = cv2.cvtColor(np_img, cv2.COLOR_GRAY2BGR) if len(np_img.shape) == 2 else np_img.copy()
+    new_img = np_img.copy()
     new_img[img_mask > 0] = GREEN
     thickness = 2
     new_img[y_min-thickness:y_min, x_min-thickness:x_max + thickness] = BLUE
@@ -74,6 +71,7 @@ def roi_objects(img: Image.Image):
     new_img[y_min:y_max, x_min-thickness:x_min] = BLUE
     new_img[y_min:y_max, x_max:x_max+thickness] = BLUE
     return new_img
+
 
 def analyze_objects(img: Image.Image):
     pcv.params.line_thickness = 2
@@ -84,6 +82,7 @@ def analyze_objects(img: Image.Image):
     filtered_mask = pcv.roi.filter(mask=img_mask, roi=roi, roi_type="partial")
     return pcv.analyze.size(img=np_img, labeled_mask=filtered_mask, n_labels=1)
 
+
 transforms = {
     "g_blur": ("Gaussian blur", gaussian_blur),
     "mask": ("Mask", mask),
@@ -91,4 +90,3 @@ transforms = {
     "analyze": ("Analyze objects", analyze_objects),
     "landmarks": ("Pseudolandmarks", pseudolandmarks),
 }
-
