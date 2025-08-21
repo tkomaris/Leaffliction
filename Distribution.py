@@ -14,6 +14,7 @@ color_by_type = {
 
 IMG_EXT = (".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".webp")
 
+
 def listFolder(path):
     dirs = []
     for (dirpath, _, filenames) in walk(path):
@@ -46,7 +47,7 @@ def analyzeDataset(path: str, verbose=False):
     if verbose:
         colors = getColors(dirs)
         sizes = list(map(len, filenames))
-        fig, axs = plt.subplots(1, 2, figsize=(20, 10), constrained_layout=True)
+        fig, axs = plt.subplots(1, 2, figsize=(18, 9), constrained_layout=True)
         fig.suptitle(path.split("/")[-1] + " class distributions")
         axs[0].pie(sizes, labels=labels, autopct='%1.1f%%', colors=colors)
         axs[1].bar(labels, sizes, label=labels, color=colors, zorder=2)

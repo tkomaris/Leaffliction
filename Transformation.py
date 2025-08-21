@@ -3,13 +3,9 @@ from PIL import Image
 import matplotlib.pyplot as plt
 from os import makedirs, scandir
 from os.path import isfile, isdir, join
-import numpy as np
-import cv2
 
 from histogram import histogram
 from transformations import transforms
-from PIL import Image
-import numpy as np
 
 
 def manipulateImage(img: Image.Image, transform: str):
@@ -99,5 +95,3 @@ def transformation_task(image_path: str, show_original: bool):
         # You might want to make this configurable or based on user input
         transformed_img_array = transforms["g_blur"][1](img)
         return [None, None, None, transformed_img_array]
-
-

@@ -4,10 +4,12 @@ import math
 fillcolor = "#fff"
 scalingFactor = 0.15
 
+
 def transform(x, y):
     y = y + 30 * math.sin(x / 80)
     x = x + 30 * math.sin(y / 80)
     return x, y
+
 
 def transform_rectangle(x0, y0, x1, y1):
     return (*transform(x0, y0),
@@ -15,6 +17,7 @@ def transform_rectangle(x0, y0, x1, y1):
             *transform(x1, y1),
             *transform(x1, y0),
             )
+
 
 def getWaveMesh(img):
     gridspace = 20
@@ -26,20 +29,27 @@ def getWaveMesh(img):
     source_grid = [transform_rectangle(*rect) for rect in target_grid]
     return [t for t in zip(target_grid, source_grid)]
 
+
 def crop(img: Image.Image):
     return ImageOps.crop(img, scalingFactor * img.size[0]).resize(img.size)
+
 
 def flip(img: Image.Image):
     return img.transpose(Image.FLIP_LEFT_RIGHT)
 
+
 def rotate(img: Image.Image):
     return img.rotate(-20, expand=True, fillcolor=fillcolor)
+
 
 def blur(img: Image.Image):
     return ImageOps.scale(img, 0.3).resize(img.size)
 
+
 def contrast(img: Image.Image):
     return ImageOps.autocontrast(img.convert("RGB"), cutoff=5)
+
+
 def deform(img: Image.Image):
     return img.transform(
         img.size, Image.Transform.MESH,
@@ -53,10 +63,12 @@ def deform(img: Image.Image):
         fillcolor=fillcolor
     )
 
+
 def wave(img: Image.Image):
     return img.transform(
         img.size, Image.Transform.MESH, getWaveMesh(img), fillcolor=fillcolor
     )
+
 
 auguments = {
     "Flip": flip,
@@ -67,4 +79,3 @@ auguments = {
     "Deform": deform,
     "Wave": wave
     }
-

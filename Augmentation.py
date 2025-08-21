@@ -6,7 +6,6 @@ from os import makedirs
 from os.path import isfile, isdir, join, splitext
 from shutil import copytree, copy2
 from augmentations import auguments
-from PIL import Image
 
 
 def manipulateImage(img: Image.Image):
