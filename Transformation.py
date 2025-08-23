@@ -90,11 +90,9 @@ if __name__ == '__main__':
         print("Error: wrong path")
 
 
-def transformation_task(image_path: str, show_original: bool):
+def transformation_task(image_path: str):
     with Image.open(image_path) as img:
         img.load()
-        available_transforms = ['g_blur', 'mask', 'roi', 'analyze', 'landmarks']
-        selected_transform = random.choice(available_transforms)
-        transformed_img_array = transforms[selected_transform][1](img)
-        return [None, None, None, transformed_img_array]
+        selected_transform = random.choice(list(transforms.values()))
+        return selected_transform[1](img), selected_transform[0]
 

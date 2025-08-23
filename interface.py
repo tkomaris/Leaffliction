@@ -57,10 +57,10 @@ class my_app(TkinterDnD.Tk):
             self.image_path = self.image_path[1:-1]
         self.true_label = os.path.basename(os.path.dirname(self.image_path))
         self.put_image_from_directory(self.image_path, self.true_label)
-        self.transformed_img = transformation_task(self.image_path, False)[3]
+        self.transformed_img, transform = transformation_task(self.image_path)
         self.transformed_img = ImageTk.PhotoImage(
             Image.fromarray(self.transformed_img))
-        self.put_image_from_data("Tranformed Img")
+        self.put_image_from_data(f"Tranformed Img: {transform}")
 
     def put_image_from_directory(self, path_img, title_img):
         self.img1 = ImageTk.PhotoImage(Image.open(path_img))
