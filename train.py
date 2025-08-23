@@ -32,7 +32,7 @@ def main(path: str):
     callback = keras.callbacks.EarlyStopping(
         monitor="val_loss",
         patience=1,
-        restore_best_weights=False,
+        restore_best_weights=True,
         min_delta=0,
         mode="auto",
         baseline=None,
