@@ -6,7 +6,6 @@ from tensorflow.keras.preprocessing.image import load_img
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
-
 def find_labels(path):
     for _, direct, _ in os.walk((path)):
         labels = direct
@@ -20,7 +19,7 @@ def predict(path_model, path_data):
     try:
         model = tf.keras.models.load_model(path_model)
     except ValueError:
-        print(f"Error, no model available at {path_model}")
+        print(f"Error: no model found at {path_model}")
 
     _, validation_images = (
         tf.keras.utils.image_dataset_from_directory(
@@ -46,38 +45,35 @@ def predict_image(path_model, path_img):
     try:
         model = tf.keras.models.load_model(path_model)
     except ValueError:
-        print(f"Error, no model available at {path_model}")
+        print(f"Error: no model found at {path_model}")
         exit(1)
 
     img = load_img(path_img, target_size=(64, 64))
     img = np.array(img)
-    
     img = np.expand_dims(img, axis=0)
 
     labels = find_labels(os.path.dirname(os.path.dirname(path_img)))
-    print("[DEBUG] Label mapping:", labels)
-    predictions = model.predict(img)
-    print("[DEBUG] Prediction probabilities:", predictions[0])
+    predictions = model.predict(img, verbose=0)
     predicted_index = np.argmax(predictions)
-    print("[DEBUG] Predicted index:", predicted_index)
-    print("[DEBUG] Predicted label:", labels[predicted_index])
-    [print(f"{pred:5.3e}:", lab) for pred, lab in zip(predictions[0], list(labels.values()))]
+    print("Predicted label:", labels[predicted_index])
     predicted_label = labels[predicted_index]
     return predicted_label
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Permet de charger le modele et de predire les donnees"
+        description="Using the model to predict the dataset"
     )
 
     parser.add_argument(
-        "path_model", default="model", help="Path vers le model a charger."
+        "path_model", 
+        default="model/", 
+        help="Path to the model",
     )
     parser.add_argument(
         "path_data",
-        default="leaves/images/",
-        help="Path vers les donnees a predire.",
+        default="images/",
+        help="Path to the dataset",
     )
 
     args = parser.parse_args()

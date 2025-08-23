@@ -7,11 +7,11 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="This program train model to predict leaf class"
+        description="This program is to train a model to predict classes of leaves"
     )
     parser.add_argument(
         "path_data",
-        default="data/leaves/images/",
+        default="images/",
         help="The path to data to train with",
     )
     args = parser.parse_args()
@@ -32,25 +32,26 @@ if __name__ == "__main__":
     )
 
     callback = keras.callbacks.EarlyStopping(
-        monitor="loss",
-        min_delta=0,
+        monitor="val_loss",
         patience=1,
+        restore_best_weights=False,
+        min_delta=0,
         mode="auto",
         baseline=None,
-        restore_best_weights=False,
-        start_from_epoch=6,
+        start_from_epoch=5,
     )
-    model = keras.models.Sequential()
 
+    model = keras.models.Sequential()
     model.add(layers.Input(shape=(64, 64, 3)))
     model.add(layers.Rescaling(1./255)) 
-
     model.add(layers.Conv2D(64, (3, 3), activation="relu"))
     model.add(layers.Conv2D(128, (3, 3), activation="relu"))
     model.add(layers.MaxPooling2D((2, 2)))
+    model.add(layers.Dropout(0.25))
     model.add(layers.Conv2D(64, (3, 3), activation="relu"))
     model.add(layers.Conv2D(128, (3, 3), activation="relu"))
     model.add(layers.MaxPooling2D((2, 2)))
+    model.add(layers.Dropout(0.25)) 
     model.add(layers.Flatten())
     model.add(layers.Dense(64, activation="relu"))
     model.add(layers.Dense(8, activation="softmax"))
@@ -60,7 +61,7 @@ if __name__ == "__main__":
     metrics = ["accuracy"]
     model.compile(optimizer=optim, loss=loss, metrics=metrics)
 
-    epochs = 100
+    epochs = 42
 
     model.fit(
         train_images,
