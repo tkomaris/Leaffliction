@@ -1,4 +1,5 @@
 import argparse
+import random
 from PIL import Image
 import matplotlib.pyplot as plt
 from os import makedirs, scandir
@@ -78,7 +79,8 @@ if __name__ == '__main__':
                         'roi' - ROI objects,\
                         'analyze' - analyze objects,\
                         'landmarks' - pseudolandmarks,\
-                        'histogram' - channels histogram")
+                        #'histogram' - channels histogram"
+                       )
     args = parser.parse_args()
     if isfile(args.src):
         showSingleImageTransforms(args.src, args.tf)
@@ -91,7 +93,8 @@ if __name__ == '__main__':
 def transformation_task(image_path: str, show_original: bool):
     with Image.open(image_path) as img:
         img.load()
-        # Apply a default transformation, e.g., gaussian blur
-        # You might want to make this configurable or based on user input
-        transformed_img_array = transforms["g_blur"][1](img)
+        available_transforms = ['g_blur', 'mask', 'roi', 'analyze', 'landmarks']
+        selected_transform = random.choice(available_transforms)
+        transformed_img_array = transforms[selected_transform][1](img)
         return [None, None, None, transformed_img_array]
+
