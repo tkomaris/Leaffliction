@@ -79,4 +79,4 @@ class my_app(TkinterDnD.Tk):
 
 
 if __name__ == "__main__":
-    my_app(os.getcwd() + "/model/")
+    my_app(os.getcwd() + "/submission/model/")
