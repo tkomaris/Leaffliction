@@ -3,21 +3,19 @@ from tensorflow import keras
 from datetime import datetime
 import argparse
 from tensorflow.keras import layers
+
+from Augmentation import enrichDataset
+from dataset_split import split_dataset
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="This program is to train a model to predict classes of leaves"
-    )
-    parser.add_argument(
-        "path_data",
-        default="images/",
-        help="The path to data to train with",
-    )
-    args = parser.parse_args()
+
+def main(path: str):
+    train_path = split_dataset(path, 0.95)[0]
+    print(train_path)
+    enrichDataset(train_path)
 
     train_images, validation_images = keras.utils.image_dataset_from_directory(
-        args.path_data,
+        train_path,
         labels="inferred",
         label_mode="int",
         class_names=None,
@@ -67,7 +65,6 @@ if __name__ == "__main__":
         train_images,
         validation_data=validation_images,
         epochs=epochs,
-        verbose=0,
         callbacks=[callback],
     )
     print("\033[96mModel train is completed!\033[0m")
@@ -75,7 +72,25 @@ if __name__ == "__main__":
     model.evaluate(validation_images, verbose=0)
     print(validation_images)
     print("\033[0m")
-    if not os.path.exists("model"):
-        os.mkdir("model")
-    model.save("model/model" +
+    if not os.path.exists("submission/model"):
+        os.mkdir("submission/model")
+    model.save("submission/model/model" +
                datetime.now().strftime("_%m-%d_%H:%M") + ".keras")
+    
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="This program is to train a model to predict classes of leaves"
+    )
+    parser.add_argument(
+        "path_data",
+        default="images/",
+        help="The path to data to train with",
+    )
+    args = parser.parse_args()
+
+    if os.path.isdir(args.path_data):
+        main(args.path_data)
+    else:
+        print("Error: passed path is not a directory")
+        

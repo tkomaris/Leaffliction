@@ -48,11 +48,8 @@ def addFileAugument(path: str, i: int):
         new_image.save(get_filename(path, suffix))
 
 
-def enrichDataset(src: str, dst: str):
-    makedirs(args.dst, exist_ok=True)
-    copytree(src, dst, dirs_exist_ok=True)
-
-    dirs = listFolder(dst)
+def enrichDataset(path: str):
+    dirs = listFolder(path)
     sizes = list(map(len, [dir["filenames"] for dir in dirs]))
     maxSize = max(sizes)
     for dir in dirs:
@@ -65,9 +62,6 @@ def enrichDataset(src: str, dst: str):
                 file_path = join(type_path, filename)
                 addFileAugument(file_path, diff)
                 diff -= 1
-
-    dirs = listFolder(dst)
-    sizes = list(map(len, [dir["filenames"] for dir in dirs]))
 
 
 if __name__ == '__main__':
@@ -92,6 +86,7 @@ if __name__ == '__main__':
         new_file_path = copy2(args.src, args.dst)
         singleImageAuguments(new_file_path)
     elif isdir(args.src):
-        enrichDataset(args.src, args.dst)
+        copytree(args.src, args.dst, dirs_exist_ok=True)
+        enrichDataset(args.dst)
     else:
         print("Source file reading error")

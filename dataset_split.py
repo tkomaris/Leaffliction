@@ -1,10 +1,19 @@
-import os
 import shutil
 import random
 import argparse
 from pathlib import Path
 from collections import defaultdict
 import sys
+
+def reset_dirs(paths: list[Path]):
+    for path in paths:
+        if path.exists():
+            if path.is_file() or path.is_symlink():
+                path.unlink()
+            elif path.is_dir():
+                shutil.rmtree(path)
+
+        path.mkdir(parents=True)
 
 def collect_images_by_class(source_path):
     if not source_path.exists():
@@ -40,44 +49,44 @@ def collect_images_by_class(source_path):
 
 def create_output_directories(source_path, images_by_class):
     """
-    Create train and validation directories with class subfolders.
+    Create train and test directories with class subfolders.
     
     Args:
         source_path (Path): Path to the source directory
         images_by_class (dict): Dictionary of images by class
         
     Returns:
-        tuple: Paths to train and validation directories
+        tuple: Paths to train and test directories
     """
     parent_dir = source_path.parent
-    train_path = parent_dir / "train"
-    val_path = parent_dir / "validation"
-    
-    train_path.mkdir(exist_ok=True)
-    val_path.mkdir(exist_ok=True)
+    submission_path = parent_dir / "submission"
+    train_path = submission_path / "augmented_directory"
+    test_path = submission_path / "test"
+
+    reset_dirs([submission_path, train_path, test_path])
     
     for class_name in images_by_class.keys():
         (train_path / class_name).mkdir(exist_ok=True)
-        (val_path / class_name).mkdir(exist_ok=True)
+        (test_path / class_name).mkdir(exist_ok=True)
     
     print(f"Created output directories:")
     print(f"  - {train_path}")
-    print(f"  - {val_path}")
+    print(f"  - {test_path}")
     
-    return train_path, val_path
+    return train_path, test_path
 
-def split_and_distribute_images(images_by_class, train_path, val_path, train_ratio=0.9):
+def split_and_distribute_images(images_by_class, train_path, test_path, train_ratio=0.9):
     """
     Args:
         images_by_class (dict): Dictionary of images by class
         train_path (Path): Path to training directory
-        val_path (Path): Path to validation directory
+        test_path (Path): Path to test directory
         train_ratio (float): Ratio of images for training (default: 0.9 for 90%)
     """
     total_train = 0
-    total_val = 0
+    total_test = 0
     
-    print(f"\nSplitting images with {train_ratio*100:.0f}% train / {(1-train_ratio)*100:.0f}% validation ratio:")
+    print(f"\nSplitting images with {train_ratio*100:.0f}% train / {(1-train_ratio)*100:.0f}% test ratio:")
     
     for class_name, images in images_by_class.items():
         shuffled_images = images.copy()
@@ -85,12 +94,12 @@ def split_and_distribute_images(images_by_class, train_path, val_path, train_rat
         
         total_images = len(shuffled_images)
         train_count = int(total_images * train_ratio)
-        val_count = total_images - train_count
+        test_count = total_images - train_count
         
         train_images = shuffled_images[:train_count]
-        val_images = shuffled_images[train_count:]
+        test_images = shuffled_images[train_count:]
         
-        print(f"  {class_name}: {train_count} train, {val_count} validation (of {total_images} total)")
+        print(f"  {class_name}: {train_count} train, {test_count} test (of {total_images} total)")
         
         train_copied = 0
         for image_path in train_images:
@@ -101,26 +110,40 @@ def split_and_distribute_images(images_by_class, train_path, val_path, train_rat
             except Exception as e:
                 print(f"Error copying {image_path} to train: {e}")
         
-        val_copied = 0
-        for image_path in val_images:
-            dst_path = val_path / class_name / image_path.name
+        test_copied = 0
+        for image_path in test_images:
+            dst_path = test_path / class_name / image_path.name
             try:
                 shutil.copy2(image_path, dst_path)
-                val_copied += 1
+                test_copied += 1
             except Exception as e:
-                print(f"    Error copying {image_path} to validation: {e}")
+                print(f"    Error copying {image_path} to test: {e}")
         
         total_train += train_copied
-        total_val += val_copied
+        total_test += test_copied
     
     print(f"\nDistribution complete:")
     print(f"  - Training: {total_train} images")
-    print(f"  - Validation: {total_val} images")
-    print(f"  - Total: {total_train + total_val} images")
+    print(f"  - Test: {total_test} images")
+    print(f"  - Total: {total_train + total_test} images")
+
+def split_dataset(path: str, train_ratio: float):
+    source_path = Path(path).resolve()
+    print(f"Processing source directory: {source_path}")
+
+    images_by_class = collect_images_by_class(source_path)
+    train_path, test_path = create_output_directories(source_path, images_by_class)
+    split_and_distribute_images(images_by_class, train_path, test_path, train_ratio)
+            
+    print(f"\nSuccess! Created train/test split:")
+    print(f"  - Training: {train_path}")
+    print(f"  - Test: {test_path}")
+    print(f"Each directory contains class subfolders with the split images.")
+    return train_path, test_path
 
 def main():
     """Main execution function."""
-    parser = argparse.ArgumentParser(description='Split .jpg images into train/validation sets with class folders')
+    parser = argparse.ArgumentParser(description='Split .jpg images into train/test sets with class folders')
     parser.add_argument('source_directory', help='Path to the source directory containing class folders with .jpg images')
     parser.add_argument('--train-ratio', type=float, default=0.9, 
                        help='Ratio of images for training (default: 0.9 for 90%%)')
@@ -137,18 +160,7 @@ def main():
         print(f"Using random seed: {args.seed}")
     
     try:
-        source_path = Path(args.source_directory).resolve()
-        print(f"Processing source directory: {source_path}")
-
-        images_by_class = collect_images_by_class(source_path)
-        train_path, val_path = create_output_directories(source_path, images_by_class)
-        split_and_distribute_images(images_by_class, train_path, val_path, args.train_ratio)
-        
-        print(f"\nSuccess! Created train/validation split:")
-        print(f"  - Training: {train_path}")
-        print(f"  - Validation: {val_path}")
-        print(f"Each directory contains class subfolders with the split images.")
-        
+        split_dataset(args.source_directory, args.train_ratio)
         return 0
         
     except Exception as e:
