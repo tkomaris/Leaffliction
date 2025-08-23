@@ -3,9 +3,9 @@ from PIL import Image
 import matplotlib.pyplot as plt
 from os import makedirs, scandir
 from os.path import isfile, isdir, join
-
 from histogram import histogram
 from transformations import transforms
+import random
 
 
 def manipulateImage(img: Image.Image, transform: str):
@@ -17,7 +17,6 @@ def manipulateImage(img: Image.Image, transform: str):
         for (name, func) in transforms.values():
             res.append((name, func(img)))
     return res
-
 
 def showSingleImageTransforms(path: str, transform: str):
     with Image.open(path) as file:
@@ -39,7 +38,6 @@ def showSingleImageTransforms(path: str, transform: str):
             histogram(file)
             plt.show()
 
-
 def saveFileTransforms(filepath: str, dst: str, transform: str):
     with Image.open(filepath) as file:
         file.load()
@@ -57,13 +55,11 @@ def saveFileTransforms(filepath: str, dst: str, transform: str):
             histogram_figure.savefig(filename)
             plt.close(histogram_figure)
 
-
 def createTransforms(src: str, dst: str, transform: str):
     makedirs(dst, exist_ok=True)
     filenames = [entry.name for entry in scandir(src) if entry.is_file()]
     for filename in filenames:
         saveFileTransforms(join(src, filename), dst, transform)
-
 
 if __name__ == '__main__':
     valid_tfs = list(transforms.keys()) + ["histogram"]
@@ -87,11 +83,10 @@ if __name__ == '__main__':
     else:
         print("Error: wrong path")
 
-
 def transformation_task(image_path: str, show_original: bool):
     with Image.open(image_path) as img:
         img.load()
-        # Apply a default transformation, e.g., gaussian blur
-        # You might want to make this configurable or based on user input
-        transformed_img_array = transforms["g_blur"][1](img)
+        available_transforms = ['g_blur', 'mask', 'roi', 'analyze', 'landmarks']
+        selected_transform = random.choice(available_transforms)
+        transformed_img_array = transforms[selected_transform][1](img)
         return [None, None, None, transformed_img_array]
