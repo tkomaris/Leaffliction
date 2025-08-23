@@ -1,12 +1,12 @@
 import os
-from tensorflow import keras
 from datetime import datetime
 import argparse
-from tensorflow.keras import layers
-
 from Augmentation import enrichDataset
 from dataset_split import split_dataset
-os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
+
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
+from tensorflow.keras import layers   # noqa: E402
+from tensorflow import keras   # noqa: E402
 
 
 def main(path: str):

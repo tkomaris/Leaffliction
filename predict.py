@@ -1,11 +1,14 @@
 import argparse
-import tensorflow as tf
 import numpy as np
-import os
-from tensorflow.keras.preprocessing.image import load_img
 from sklearn.metrics import accuracy_score
 
-os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
+import os
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
+import tensorflow as tf  # noqa: E402
+from tensorflow.keras.preprocessing.image import load_img  # noqa: E402
+
+# Suppress TensorFlow Python-level logging
+tf.get_logger().setLevel('ERROR')
 
 
 def find_labels(path):
