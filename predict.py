@@ -3,6 +3,7 @@ import tensorflow as tf
 import numpy as np
 import os
 from tensorflow.keras.preprocessing.image import load_img
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
@@ -20,25 +21,38 @@ def predict(path_model, path_data):
         model = tf.keras.models.load_model(path_model)
     except ValueError:
         print(f"Error: no model found at {path_model}")
+        return
 
-    _, validation_images = (
-        tf.keras.utils.image_dataset_from_directory(
-            path_data,
-            labels="inferred",
-            label_mode="int",
-            class_names=None,
-            color_mode="rgb",
-            batch_size=32,
-            image_size=(64, 64),
-            seed=42,
-            validation_split=0.2,
-            subset="both",
-            interpolation="bilinear",
-            follow_links=False,
-        )
+    dataset = tf.keras.utils.image_dataset_from_directory(
+        path_data,
+        labels="inferred",
+        label_mode="int",
+        class_names=None,
+        color_mode="rgb",
+        batch_size=32,
+        image_size=(64, 64),
+        shuffle=False,
+        interpolation="bilinear",
+        follow_links=False,
     )
 
-    model.evaluate(validation_images)
+    class_names = dataset.class_names
+    print(f"Found classes: {class_names}")
+
+    print("Making predictions on the entire dataset...")
+    predictions = model.predict(dataset, verbose=0)
+    predicted_labels = np.argmax(predictions, axis=1)
+
+    true_labels = []
+    for _, labels in dataset:
+        true_labels.extend(labels.numpy())
+    true_labels = np.array(true_labels)
+
+    accuracy = accuracy_score(true_labels, predicted_labels)
+    
+    print(f"\nTotal images processed: {len(true_labels)}")
+    print(f"Accuracy: {accuracy:.4f} ({accuracy*100:.2f}%)")
+    return accuracy
 
 
 def predict_image(path_model, path_img):
@@ -73,10 +87,11 @@ if __name__ == "__main__":
     parser.add_argument(
         "path_data",
         default="images/",
-        help="Path to the dataset",
+        help="Path to the dataset or single image",
     )
 
     args = parser.parse_args()
+    
     if os.path.isdir(args.path_data):
         predict(args.path_model, args.path_data)
     else:
