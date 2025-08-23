@@ -7,7 +7,6 @@ from histogram import histogram
 from transformations import transforms
 import random
 
-
 def manipulateImage(img: Image.Image, transform: str):
     res = []
     if transform:
