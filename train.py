@@ -67,12 +67,12 @@ if __name__ == "__main__":
         train_images,
         validation_data=validation_images,
         epochs=epochs,
-        verbose=2,
+        verbose=0,
         callbacks=[callback],
     )
-    print("\033[96mModel train complete\033[0m")
+    print("\033[96mModel train is completed!\033[0m")
     print("\033[92mNow evaluating model...")
-    model.evaluate(validation_images, verbose=2)
+    model.evaluate(validation_images, verbose=0)
     print(validation_images)
     print("\033[0m")
     if not os.path.exists("model"):
