@@ -3,9 +3,10 @@ import tensorflow as tf
 import numpy as np
 import os
 from tensorflow.keras.preprocessing.image import load_img
-from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+from sklearn.metrics import accuracy_score
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
+
 
 def find_labels(path):
     for _, direct, _ in os.walk((path)):
@@ -49,7 +50,7 @@ def predict(path_model, path_data):
     true_labels = np.array(true_labels)
 
     accuracy = accuracy_score(true_labels, predicted_labels)
-    
+
     print(f"\nTotal images processed: {len(true_labels)}")
     print(f"Accuracy: {accuracy:.4f} ({accuracy*100:.2f}%)")
     return accuracy
@@ -80,8 +81,8 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        "path_model", 
-        default="model/", 
+        "path_model",
+        default="model/",
         help="Path to the model",
     )
     parser.add_argument(
@@ -91,7 +92,7 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
-    
+
     if os.path.isdir(args.path_data):
         predict(args.path_model, args.path_data)
     else:

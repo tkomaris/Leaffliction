@@ -41,7 +41,7 @@ def main(path: str):
 
     model = keras.models.Sequential()
     model.add(layers.Input(shape=(64, 64, 3)))
-    model.add(layers.Rescaling(1./255)) 
+    model.add(layers.Rescaling(1./255))
     model.add(layers.Conv2D(64, (3, 3), activation="relu"))
     model.add(layers.Conv2D(128, (3, 3), activation="relu"))
     model.add(layers.MaxPooling2D((2, 2)))
@@ -49,7 +49,7 @@ def main(path: str):
     model.add(layers.Conv2D(64, (3, 3), activation="relu"))
     model.add(layers.Conv2D(128, (3, 3), activation="relu"))
     model.add(layers.MaxPooling2D((2, 2)))
-    model.add(layers.Dropout(0.25)) 
+    model.add(layers.Dropout(0.25))
     model.add(layers.Flatten())
     model.add(layers.Dense(64, activation="relu"))
     model.add(layers.Dense(8, activation="softmax"))
@@ -76,11 +76,12 @@ def main(path: str):
         os.mkdir("submission/model")
     model.save("submission/model/model" +
                datetime.now().strftime("_%m-%d_%H:%M") + ".keras")
-    
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="This program is to train a model to predict classes of leaves"
+        description="This program is to train a model \
+            to predict classes of leaves"
     )
     parser.add_argument(
         "path_data",
@@ -93,4 +94,3 @@ if __name__ == "__main__":
         main(args.path_data)
     else:
         print("Error: passed path is not a directory")
-        

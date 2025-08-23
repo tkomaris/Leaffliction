@@ -5,6 +5,7 @@ from Transformation import transformation_task
 import os
 from PIL import Image, ImageTk
 
+
 class my_app(TkinterDnD.Tk):
     def __init__(self, model_path: str):
         super().__init__()
@@ -26,7 +27,7 @@ class my_app(TkinterDnD.Tk):
         button.pack()
 
         self.attributes('-topmost', True)
-        self.focus_force()  
+        self.focus_force()
         self.after(100, lambda: self.attributes('-topmost', False))
         self.mainloop()
 

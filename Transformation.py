@@ -79,8 +79,8 @@ if __name__ == '__main__':
                         'roi' - ROI objects,\
                         'analyze' - analyze objects,\
                         'landmarks' - pseudolandmarks,\
-                        #'histogram' - channels histogram"
-                       )
+                        'histogram' - channels histogram"
+                        )
     args = parser.parse_args()
     if isfile(args.src):
         showSingleImageTransforms(args.src, args.tf)
@@ -95,4 +95,3 @@ def transformation_task(image_path: str):
         img.load()
         selected_transform = random.choice(list(transforms.values()))
         return selected_transform[1](img), selected_transform[0]
-
