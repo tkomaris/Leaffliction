@@ -35,7 +35,6 @@ class my_app(TkinterDnD.Tk):
         self.canvas.create_text(400, 320, text=self.predicted_labels,
                                 font=("Arial", 40, "bold"), fill="green")
 
-
     def predict(self):
         if hasattr(self, "image_path"):
             self.predicted_labels = predict_image(
