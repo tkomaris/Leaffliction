@@ -7,9 +7,6 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 import tensorflow as tf  # noqa: E402
 from tensorflow.keras.preprocessing.image import load_img  # noqa: E402
 
-# Suppress TensorFlow Python-level logging
-tf.get_logger().setLevel('ERROR')
-
 
 def find_labels(path):
     for _, direct, _ in os.walk((path)):
