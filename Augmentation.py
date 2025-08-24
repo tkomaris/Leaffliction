@@ -66,18 +66,8 @@ def enrichDataset(path: str):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Augments the data set')
-    parser.add_argument(
-        '-s', '--src',
-        type=str,
-        required=True,
-        help='add a source file/folder'
-    )
-    parser.add_argument(
-        '-d', '--dst',
-        type=str,
-        required=True,
-        help='add a destination folder'
-    )
+    parser.add_argument('src', type=str, help='add a source file/folder')
+    parser.add_argument('dst', type=str, help='add a destination folder')
     args = parser.parse_args()
     makedirs(args.dst, exist_ok=True)
     if not isdir(args.dst):

@@ -11,7 +11,6 @@ from tensorflow import keras   # noqa: E402
 
 def main(path: str):
     train_path = split_dataset(path, 0.95)[0]
-    print(train_path)
     enrichDataset(train_path)
 
     train_images, validation_images = keras.utils.image_dataset_from_directory(
@@ -68,10 +67,6 @@ def main(path: str):
         callbacks=[callback],
     )
     print("\033[96mModel train is completed!\033[0m")
-    print("\033[92mNow evaluating model...")
-    model.evaluate(validation_images, verbose=0)
-    print(validation_images)
-    print("\033[0m")
     if not os.path.exists("submission/model"):
         os.mkdir("submission/model")
     model.save("submission/model/model" +
