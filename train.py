@@ -28,6 +28,12 @@ def main(path: str):
         follow_links=False,
     )
 
+    if not os.path.exists("submission/model"):
+        os.mkdir("submission/model")
+    with open("submission/model/class_names.txt", "w") as f:
+        for name in train_images.class_names:
+            f.write(name + "\n")
+
     callback = keras.callbacks.EarlyStopping(
         monitor="val_loss",
         patience=1,
@@ -67,8 +73,6 @@ def main(path: str):
         callbacks=[callback],
     )
     print("\033[96mModel train is completed!\033[0m")
-    if not os.path.exists("submission/model"):
-        os.mkdir("submission/model")
     model.save("submission/model/model" +
                datetime.now().strftime("_%m-%d_%H:%M") + ".keras")
 
