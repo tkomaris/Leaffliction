@@ -32,12 +32,9 @@ class my_app(TkinterDnD.Tk):
         self.mainloop()
 
     def put_result(self):
-        if self.true_label == self.predicted_labels:
-            self.canvas.create_text(400, 320, text=self.predicted_labels,
-                                    font=("Arial", 40, "bold"), fill="green")
-        else:
-            self.canvas.create_text(400, 320, text=self.predicted_labels,
-                                    font=("Arial", 40, "bold"), fill="red")
+        self.canvas.create_text(400, 320, text=self.predicted_labels,
+                                font=("Arial", 40, "bold"), fill="green")
+
 
     def predict(self):
         if hasattr(self, "image_path"):
@@ -56,8 +53,8 @@ class my_app(TkinterDnD.Tk):
         self.image_path = event.data
         if self.image_path.startswith("{"):
             self.image_path = self.image_path[1:-1]
-        self.true_label = os.path.basename(os.path.dirname(self.image_path))
-        self.put_image_from_directory(self.image_path, self.true_label)
+        filename = os.path.basename(self.image_path)
+        self.put_image_from_directory(self.image_path, filename)
         self.transformed_img, transform = transformation_task(self.image_path)
         self.transformed_img = ImageTk.PhotoImage(
             Image.fromarray(self.transformed_img))
