@@ -8,6 +8,15 @@ import tensorflow as tf  # noqa: E402
 from tensorflow.keras.preprocessing.image import load_img  # noqa: E402
 
 
+def load_class_names(path_model):
+    class_file = os.path.join(os.path.dirname(path_model), "class_names.txt")
+    if not os.path.exists(class_file):
+        raise FileNotFoundError("class_names.txt not found next to model")
+    with open(class_file) as f:
+        class_names = [line.strip() for line in f.readlines()]
+    return class_names
+
+
 def find_labels(path):
     for _, direct, _ in os.walk((path)):
         labels = direct
@@ -37,9 +46,6 @@ def predict(path_model, path_data):
         follow_links=False,
     )
 
-    class_names = dataset.class_names
-    print(f"Found classes: {class_names}")
-
     print("Making predictions on the entire dataset...")
     predictions = model.predict(dataset, verbose=0)
     predicted_labels = np.argmax(predictions, axis=1)
@@ -59,6 +65,7 @@ def predict(path_model, path_data):
 def predict_image(path_model, path_img):
     try:
         model = tf.keras.models.load_model(path_model)
+        class_names = load_class_names(path_model)
     except ValueError:
         print(f"Error: no model found at {path_model}")
         exit(1)
@@ -67,11 +74,10 @@ def predict_image(path_model, path_img):
     img = np.array(img)
     img = np.expand_dims(img, axis=0)
 
-    labels = find_labels(os.path.dirname(os.path.dirname(path_img)))
     predictions = model.predict(img, verbose=0)
     predicted_index = np.argmax(predictions)
-    print("Predicted label:", labels[predicted_index])
-    predicted_label = labels[predicted_index]
+    predicted_label = class_names[predicted_index]
+    print("Predicted label:", predicted_label)
     return predicted_label
 
 
